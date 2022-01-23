@@ -1,0 +1,121 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+<div class="mud-elevation-10 px-6 py-2 mb-8 mx-4 rounded-pill amber darken-4" style="width:fit-content;">
+    <MudText Typo="Typo.h5" Style="@($"color:{Colors.Grey.Lighten4};")"><b>Granblue Fantasy Spark
+            Calculator</b></MudText>
+</div>
+<div class="mud-elevation-10 white px-6 mx-4 rounded">
+    <MudGrid>
+        <MudItem md="3" class="d-flex justify-center align-center">
+            <MudDateRangePicker PickerVariant="PickerVariant.Dialog" Color="Color.Warning"
+                Label="Start Date - Goal Date!" @bind-DateRange="dateRange" />
+        </MudItem>
+        <MudItem md="2" class="d-flex justify-center align-center">
+            <MudNumericField @bind-Value="crystal" Immediate="true" Label="Crystal" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem md="2" class="d-flex justify-center align-center">
+            <MudNumericField @bind-Value="singleTicket" Immediate="true" Label="Draw Ticket"
+                Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem md="2" class="d-flex justify-center align-center">
+            <MudNumericField @bind-Value="tenTicket" Immediate="true" Label="10-Part Draw" Variant="Variant.Outlined" />
+        </MudItem>
+        <MudItem md="3" class="d-flex justify-start align-center">
+            <MudButton @onclick="ClearParam" Variant="Variant.Outlined" DisableElevation="true" Color="Color.Warning"
+                style="width:95%;">Clear</MudButton>
+        </MudItem>
+    </MudGrid>
+    <MudGrid>
+        <MudItem md="12" class="d-flex justify-center align-center pt-4 my-0">
+            <div class="py-1 px-0 mx-0" Style="width:100%; @($"background-color:{Colors.Amber.Darken3};")">
+                <MudText Align="Align.Center" Typo="Typo.h6" class="text-white">
+                    @result
+                </MudText>
+            </div>
+        </MudItem>
+    </MudGrid>
+    <hr/>
+    <div class="d-flex justify-center align-center pb-4 ">
+        <MudProgressLinear Color="Color.Warning" Striped="true" Size="Size.Large" Value=@percent>
+            <MudText Typo="Typo.h5"
+                style="z-index:1; text-shadow: 0px 0px 3px #FF6F00, 0 0 15px #FF8F00;">
+                <span class="text-white"><b>@percent%</b></span>
+            </MudText>
+        </MudProgressLinear>
+    </div>
+</div>
+
+
+@code {
+     private DateRange dateRange = new DateRange(DateTime.Now.Date, DateTime.Now.Date);
+    private int percent;
+    private int totalDraw = 0;
+    private int _crystal;
+    private string result = "Please fill in your cystal & ticket!";
+    private int crystal
+    {
+        get { return _crystal; }
+        set
+        {
+            if (value < 0)
+                value = 0;
+            _crystal = value;
+            calculatePercent();
+        }
+    }
+
+    private int _singleTicket;
+    private int singleTicket
+    {
+        get { return _singleTicket; }
+        set
+        {
+            if (value < 0)
+                value = 0;
+            _singleTicket = value;
+            calculatePercent();
+        }
+    }
+
+
+    private int _tenTicket;
+    private int tenTicket
+    {
+        get { return _tenTicket; }
+        set
+        {
+            if (value < 0)
+                value = 0;
+            _tenTicket = value;
+            calculatePercent();
+        }
+    }
+
+    private void calculatePercent()
+    {
+        percent = ((crystal / 300) + (tenTicket * 10) + singleTicket) * 100 / 300;
+        percent = percent > 100 ? 100 : percent;
+        totalDraw = crystal / 300 + tenTicket * 10 + singleTicket;
+        if (percent < 100)
+        {
+            result = "Total Draw: " + totalDraw + " times (Need " + (300 - totalDraw) + " times to spark! " +
+            (Math.Abs(dateRange.Start.Value.Date.Subtract(dateRange.End.Value.Date).TotalDays)) + " days to goal!";
+        }
+        else
+        {
+            result = "You can spark now!";
+        }
+    }
+
+    private void ClearParam()
+    {
+        singleTicket = 0;
+        tenTicket = 0;
+        crystal = 0;
+        dateRange.Start = DateTime.Now.Date;
+        dateRange = new DateRange(DateTime.Now.Date, DateTime.Now.Date);
+        result = "Please fill in your cystal & ticket!";
+    }
+}
